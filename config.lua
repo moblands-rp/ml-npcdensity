@@ -1,16 +1,23 @@
 Config = Config or {}
 
 -- ====================== MAIN SETTINGS ======================
-Config.DefaultDensity   = 0.5     -- 0.0 = no NPCs, 1.0 = GTA default, 2.0 = double
-Config.Command          = 'npcdensity'   -- Change command name here
-Config.AdminOnly        = true
-Config.AdminPermission  = 'admin'
+Config.DefaultPedDensity     = 0.5     -- Pedestrians only
+Config.DefaultVehicleDensity = 0.5     -- Cars, trucks, parked vehicles
+
+Config.Command              = 'npcdensity'   -- Change to 'mldensity' if you want
+Config.AdminOnly            = true
+Config.AdminPermission      = 'admin'
 
 -- ====================== MENU TEXTS ======================
-Config.MenuHeader       = "🎮 NPC Density Menu"
-Config.NotifyPrefix     = "NPC Density"
+Config.MenuHeader           = "🎮 NPC & Vehicle Density Menu"
+Config.NotifyPrefix         = "Density"
 
--- ====================== CLEAR OPTIONS (NEW) ======================
-Config.AutoClearOnChange = true      -- Automatically delete nearby NPCs when you change density (recommended)
-Config.ClearRadius       = 150.0     -- How far to clear NPCs (150 = good balance, lower = less lag)
-Config.ManualClearOption = true      -- Show "Clear Nearby NPCs Now" button in menu
+-- ====================== CLEAR OPTIONS ======================
+Config.AutoClearPedsOnChange     = true      -- Auto delete nearby peds when changing ped density
+Config.AutoClearVehiclesOnChange = true      -- Auto delete nearby vehicles when changing vehicle density
+
+Config.PedClearRadius            = 150.0     -- Radius for peds
+Config.VehicleClearRadius        = 150.0     -- Radius for vehicles
+
+Config.ManualClearPeds           = true      -- Show "Clear Peds Now" button
+Config.ManualClearVehicles       = true      -- Show "Clear Vehicles Now" button

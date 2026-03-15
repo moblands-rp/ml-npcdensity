@@ -1,9 +1,9 @@
 fx_version 'cerulean'
 game 'gta5'
 
-description 'ML NPC Density Reducer with In-Game Menu - Fully configurable'
-author 'ml (edited by Grok)'
-version '1.1.0'
+description 'ML NPC + Vehicle Density Reducer with In-Game Menu - Fully configurable'
+author 'ml'
+version '1.2.0'
 
 shared_script 'config.lua'
 
