@@ -1,7 +1,7 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 local currentDensity = Config.DefaultDensity
 
--- Main loop - applies density every frame
+-- ====================== MAIN DENSITY LOOP ======================
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(0)
@@ -10,7 +10,25 @@ Citizen.CreateThread(function()
     end
 end)
 
--- Open menu
+-- ====================== CLEAR NEARBY NPCS FUNCTION ======================
+local function ClearNearbyPeds()
+    local playerPed = PlayerPedId()
+    local playerCoords = GetEntityCoords(playerPed)
+    local peds = GetGamePool('CPed')
+
+    for _, ped in ipairs(peds) do
+        if ped ~= playerPed and not IsPedAPlayer(ped) and DoesEntityExist(ped) then
+            local pedCoords = GetEntityCoords(ped)
+            if #(playerCoords - pedCoords) < Config.ClearRadius then
+                if NetworkHasControlOfEntity(ped) or NetworkRequestControlOfEntity(ped) then
+                    DeleteEntity(ped)
+                end
+            end
+        end
+    end
+end
+
+-- ====================== OPEN MENU ======================
 RegisterNetEvent('ml-npcdensity:client:OpenMenu', function()
     local menu = {
         { header = Config.MenuHeader, isMenuHeader = true },
@@ -24,14 +42,29 @@ RegisterNetEvent('ml-npcdensity:client:OpenMenu', function()
         { header = "🔢 Custom Value",  txt = "0.0 - 2.0", params = { event = 'ml-npcdensity:client:CustomDensity' } },
     }
 
+    if Config.ManualClearOption then
+        table.insert(menu, {
+            header = "🧹 Clear Nearby NPCs Now",
+            txt = "Instantly remove visible NPCs",
+            params = { event = 'ml-npcdensity:client:ClearPeds' }
+        })
+    end
+
     TriggerEvent('qb-menu:client:openMenu', menu)
 end)
 
+-- ====================== SET DENSITY ======================
 RegisterNetEvent('ml-npcdensity:client:SetDensity', function(data)
     currentDensity = data.density
+    
+    if Config.AutoClearOnChange then
+        ClearNearbyPeds()
+    end
+
     QBCore.Functions.Notify(Config.NotifyPrefix .. ' set to: ' .. currentDensity, 'success')
 end)
 
+-- ====================== CUSTOM INPUT ======================
 RegisterNetEvent('ml-npcdensity:client:CustomDensity', function()
     local input = exports['qb-input']:ShowInput({
         header = "Custom NPC Density",
@@ -45,6 +78,7 @@ RegisterNetEvent('ml-npcdensity:client:CustomDensity', function()
         local val = tonumber(input.density)
         if val and val >= 0.0 and val <= 2.0 then
             currentDensity = val
+            if Config.AutoClearOnChange then ClearNearbyPeds() end
             QBCore.Functions.Notify(Config.NotifyPrefix .. ' set to: ' .. currentDensity, 'success')
         else
             QBCore.Functions.Notify('Invalid value (0.0 - 2.0)', 'error')
@@ -52,7 +86,13 @@ RegisterNetEvent('ml-npcdensity:client:CustomDensity', function()
     end
 end)
 
--- Resource start
+-- ====================== MANUAL CLEAR ======================
+RegisterNetEvent('ml-npcdensity:client:ClearPeds', function()
+    ClearNearbyPeds()
+    QBCore.Functions.Notify('Nearby NPCs cleared!', 'success')
+end)
+
+-- ====================== RESOURCE START ======================
 AddEventHandler('onClientResourceStart', function(resource)
     if GetCurrentResourceName() ~= resource then return end
     currentDensity = Config.DefaultDensity
